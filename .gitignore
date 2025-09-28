@@ -1,6 +1,6 @@
 # Dependencies
 node_modules/
-npm-debug.log*
+npm-debug.log*gut
 
 # Environment variables
 .env
