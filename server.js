@@ -29,13 +29,13 @@ const dbConfig = {
 
 let db;
 
-console.log('🔧 Starting server...');
-console.log('📊 Database config:', { ...dbConfig, password: '***' });
+console.log(' Starting server...');
+console.log(' Database config:', { ...dbConfig, password: '***' });
 
 // Initialize database connection
 async function initDB() {
   try {
-    console.log('🔄 Connecting to database...');
+    console.log(' Connecting to database...');
     db = await mysql.createConnection(dbConfig);
     console.log('✅ Connected to MySQL database');
     
@@ -43,7 +43,7 @@ async function initDB() {
     await createTables();
     console.log('✅ Database tables ready');
   } catch (error) {
-    console.error('❌ Database connection failed:', error.message);
+    console.error('Database connection failed:', error.message);
     console.log('💡 Make sure MySQL is running and credentials are correct');
   }
 }
@@ -95,26 +95,26 @@ async function createTables() {
     const [tables] = await db.execute('SHOW TABLES');
     console.log('📋 Available tables:', tables.map(t => Object.values(t)[0]));
   } catch (error) {
-    console.error('❌ Error creating tables:', error.message);
+    console.error(' Error creating tables:', error.message);
   }
 }
 
 // API Routes with better logging
 app.get('/api/groups', async (req, res) => {
-  console.log('📥 GET /api/groups');
+  console.log(' GET /api/groups');
   try {
     const [groups] = await db.execute('SELECT * FROM user_groups ORDER BY created_at DESC');
     console.log('✅ Retrieved groups:', groups.length);
     res.json(groups);
   } catch (error) {
-    console.error('❌ Error fetching groups:', error.message);
+    console.error(' Error fetching groups:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
 
 app.get('/api/groups/:id/messages', async (req, res) => {
   const { id } = req.params;
-  console.log(`📥 GET /api/groups/${id}/messages`);
+  console.log(` GET /api/groups/${id}/messages`);
   try {
     const [messages] = await db.execute(
       'SELECT * FROM messages WHERE group_id = ? ORDER BY created_at ASC',
@@ -123,7 +123,7 @@ app.get('/api/groups/:id/messages', async (req, res) => {
     console.log(`✅ Retrieved ${messages.length} messages for group ${id}`);
     res.json(messages);
   } catch (error) {
-    console.error('❌ Error fetching messages:', error.message);
+    console.error(' Error fetching messages:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
@@ -131,8 +131,8 @@ app.get('/api/groups/:id/messages', async (req, res) => {
 app.post('/api/groups/:id/messages', async (req, res) => {
   const { id } = req.params;
   const { message, sender_name, is_anonymous } = req.body;
-  console.log(`📤 POST /api/groups/${id}/messages`);
-  console.log('📝 Message data:', { message, sender_name, is_anonymous });
+  console.log(` POST /api/groups/${id}/messages`);
+  console.log(' Message data:', { message, sender_name, is_anonymous });
   
   try {
     const [result] = await db.execute(
@@ -149,31 +149,31 @@ app.post('/api/groups/:id/messages', async (req, res) => {
 
     // Emit the message to all connected clients
     io.to(`group_${id}`).emit('new_message', newMessage[0]);
-    console.log(`🔄 Broadcasted message to group_${id}`);
+    console.log(` Broadcasted message to group_${id}`);
     
     res.json(newMessage[0]);
   } catch (error) {
-    console.error('❌ Error saving message:', error.message);
+    console.error(' Error saving message:', error.message);
     res.status(500).json({ error: error.message });
   }
 });
 
 // Socket.IO connection handling with better logging
 io.on('connection', (socket) => {
-  console.log('🔌 User connected:', socket.id);
+  console.log(' User connected:', socket.id);
 
   socket.on('join_group', (groupId) => {
     socket.join(`group_${groupId}`);
-    console.log(`👥 User ${socket.id} joined group ${groupId}`);
+    console.log(` User ${socket.id} joined group ${groupId}`);
   });
 
   socket.on('leave_group', (groupId) => {
     socket.leave(`group_${groupId}`);
-    console.log(`👋 User ${socket.id} left group ${groupId}`);
+    console.log(` User ${socket.id} left group ${groupId}`);
   });
 
   socket.on('send_message', async (data) => {
-    console.log('📨 Received message via socket:', data);
+    console.log(' Received message via socket:', data);
     try {
       const { groupId, message, senderName, isAnonymous } = data;
       
@@ -189,14 +189,14 @@ io.on('connection', (socket) => {
 
       console.log('✅ Socket message saved:', newMessage[0]);
       io.to(`group_${groupId}`).emit('new_message', newMessage[0]);
-      console.log(`🔄 Broadcasted socket message to group_${groupId}`);
+      console.log(` Broadcasted socket message to group_${groupId}`);
     } catch (error) {
-      console.error('❌ Error handling socket message:', error.message);
+      console.error(' Error handling socket message:', error.message);
     }
   });
 
   socket.on('disconnect', () => {
-    console.log('🔌 User disconnected:', socket.id);
+    console.log(' User disconnected:', socket.id);
   });
 });
 
@@ -213,8 +213,8 @@ const PORT = process.env.PORT || 3000;
 
 initDB().then(() => {
   server.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`🌐 Open http://localhost:${PORT} to view the app`);
-    console.log(`🧪 Test server: http://localhost:${PORT}/api/test`);
+    console.log(` Server running on port ${PORT}`);
+    console.log(` Open http://localhost:${PORT} to view the app`);
+    console.log(` Test server: http://localhost:${PORT}/api/test`);
   });
 });
