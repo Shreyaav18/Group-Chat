@@ -15,27 +15,27 @@ async function setupDatabase() {
 
     try {
         // Connect to MySQL (without database)
-        console.log('1️⃣ Connecting to MySQL server...');
+        console.log('1 Connecting to MySQL server...');
         connection = await mysql.createConnection(config);
-        console.log('✅ Connected to MySQL server');
+        console.log('Connected to MySQL server');
 
         // Create database if it doesn't exist
-        console.log('2️⃣ Creating database...');
+        console.log('2️ Creating database...');
         await connection.execute('CREATE DATABASE IF NOT EXISTS group_chat');
-        console.log('✅ Database "group_chat" created/verified');
+        console.log('Database "group_chat" created/verified');
 
         // Close connection and reconnect to the specific database
         await connection.end();
-        console.log('✅ Reconnecting to group_chat database...');
+        console.log(' Reconnecting to group_chat database...');
         
         connection = await mysql.createConnection({
             ...config,
             database: 'group_chat'
         });
-        console.log('✅ Connected to group_chat database');
+        console.log(' Connected to group_chat database');
 
         // Create tables
-        console.log('3️⃣ Creating tables...');
+        console.log('3️ Creating tables...');
         
         // Groups table
         const createGroupsSQL = `CREATE TABLE IF NOT EXISTS groups (
@@ -44,7 +44,7 @@ async function setupDatabase() {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`;
         await connection.execute(createGroupsSQL);
-        console.log('✅ Groups table created');
+        console.log('Groups table created');
 
         // Messages table  
         const createMessagesSQL = `CREATE TABLE IF NOT EXISTS messages (
@@ -56,7 +56,7 @@ async function setupDatabase() {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`;
         await connection.execute(createMessagesSQL);
-        console.log('✅ Messages table created');
+        console.log(' Messages table created');
 
         // Add indexes separately
         try {
@@ -79,21 +79,21 @@ async function setupDatabase() {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`;
         await connection.execute(createUsersSQL);
-        console.log('✅ Users table created');
+        console.log(' Users table created');
 
         // Insert default group
-        console.log('4️⃣ Setting up default group...');
+        console.log('4️ Setting up default group...');
         const [groups] = await connection.execute('SELECT * FROM groups WHERE name = ?', ['Fun Friday Group']);
         
         if (groups.length === 0) {
             await connection.execute('INSERT INTO groups (name) VALUES (?)', ['Fun Friday Group']);
-            console.log('✅ Default group "Fun Friday Group" created');
+            console.log(' Default group "Fun Friday Group" created');
         } else {
-            console.log('✅ Default group already exists');
+            console.log(' Default group already exists');
         }
 
         // Insert some sample messages
-        console.log('5️⃣ Adding sample messages...');
+        console.log('5️ Adding sample messages...');
         const [existingMessages] = await connection.execute('SELECT COUNT(*) as count FROM messages');
         
         if (existingMessages[0].count === 0) {
@@ -112,28 +112,28 @@ async function setupDatabase() {
                     [1, msg.sender, msg.message, msg.sender === 'Anonymous']
                 );
             }
-            console.log('✅ Sample messages added');
+            console.log('Sample messages added');
         } else {
-            console.log('✅ Messages already exist, skipping samples');
+            console.log('Messages already exist, skipping samples');
         }
 
         // Verify setup
-        console.log('6️⃣ Verifying setup...');
+        console.log(' Verifying setup...');
         const [tables] = await connection.execute('SHOW TABLES');
-        console.log('📋 Tables in database:', tables.map(t => Object.values(t)[0]));
+        console.log(' Tables in database:', tables.map(t => Object.values(t)[0]));
 
         const [messageCount] = await connection.execute('SELECT COUNT(*) as count FROM messages');
-        console.log(`📊 Total messages: ${messageCount[0].count}`);
+        console.log(`Total messages: ${messageCount[0].count}`);
 
         const [groupCount] = await connection.execute('SELECT COUNT(*) as count FROM groups');
-        console.log(`👥 Total groups: ${groupCount[0].count}`);
+        console.log(`Total groups: ${groupCount[0].count}`);
 
-        console.log('🎉 Database setup completed successfully!');
-        console.log('💡 You can now run: npm start');
+        console.log('Database setup completed successfully!');
+        console.log(' You can now run: npm start');
 
     } catch (error) {
-        console.error('❌ Database setup failed:', error.message);
-        console.log('\n🔧 Troubleshooting tips:');
+        console.error(' Database setup failed:', error.message);
+        console.log('\nTroubleshooting tips:');
         console.log('1. Make sure MySQL is running');
         console.log('2. Check your .env file credentials');
         console.log('3. Try connecting manually: mysql -u root -p');
@@ -146,7 +146,7 @@ async function setupDatabase() {
     } finally {
         if (connection) {
             await connection.end();
-            console.log('🔌 Database connection closed');
+            console.log('Database connection closed');
         }
     }
 }
